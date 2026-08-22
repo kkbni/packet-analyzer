@@ -1,15 +1,17 @@
 from .capture import PacketCapturer
-from .parsers.ethernet import parse_ethernet
+from .parsers.ethernet import EthernetFrame
 
 def main():
-    print('Starting capture:')
+    print('----- Starting capture:\n')
+    delim_str = '-' * 30 + '\n'
 
     capturer = PacketCapturer('eth0')
 
-    for packet in capturer.capture():
-        dest, src, type, data = parse_ethernet(packet)
+    for data in capturer.capture():
 
-        print(f'dest: {dest.hex(':')}\nsrc: {src.hex(':')}\ntype: {type:#06x}\ndata:\n{data.hex()}\n')
+        print(delim_str)
+        frame = EthernetFrame.parse(data)
+        print(frame)
 
 if __name__ == '__main__':
     main()
