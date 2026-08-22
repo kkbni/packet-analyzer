@@ -1,0 +1,54 @@
+from dataclasses import dataclass
+
+@dataclass
+class IPv4Packet:
+    version: int    # =4 -> ipv4 | =6 -> ipv6
+    ihl: int    # Internet Header Len - in 32bit words
+    tos: int    # Type of Service
+    total_len: int
+    identification: int
+    flags: int
+    frag_offset: int
+    ttl: int
+    protocol: int
+    checksum: int
+    src_ip: str
+    dest_ip: str
+    options: bytes
+    payload: bytes
+
+    @classmethod
+    def parse(cls, data: bytes):
+        version = data[0] >> 4
+        if version != 4:
+            raise ValueError('Not an IPv4 packet')
+    
+        ihl = data[0] & 0x0F
+        if ihl < 5:
+            raise ValueError('Invalid IHL')
+        
+        header_len = ihl * 4
+    
+        tos = data[1]
+        total_len = int.from_bytes(data[2:4], 'big')
+        identification = int.from_bytes(data[4:6], 'big')
+    
+        flags = int.from_bytes(data[6:8], 'big') >> 13
+        frag_offset = int.from_bytes(data[6:8], 'big') & 0x1FFF
+    
+        ttl = data[8]
+        protocol = data[9]
+        checksum = int.from_bytes(data[10:12], 'big')
+    
+        src_ip = '.'.join( map(str, data[12:16]) )
+        dest_ip = '.'.join( map(str, data[16:20]) )
+    
+        # options left if IHL > 5
+        options = data[20:header_len] if header_len > 20 else b''
+        payload = data[header_len:total_len]
+
+        return cls(version, ihl, tos, total_len, identification, flags, frag_offset, 
+                   ttl, protocol, checksum, src_ip, dest_ip, options, payload)
+
+    def __str__(self):
+        return f'src IP: {self.src_ip}\ndest IP: {self.dest_ip}\nprotocol: {self.protocol}\n'
