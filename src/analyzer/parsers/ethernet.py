@@ -13,7 +13,14 @@ class EthernetFrame:
 
         dest_mac = data[0:6].hex(':')
         src_mac = data[6:12].hex(':')
+
         ether_type = int.from_bytes(data[12:14], 'big')
+
+        # IEEE 802.3 frame -> ether_type is Length
+        if ether_type <= 1500:
+            ether_type = 0 # set to 0 to skip these frames
+        # else it is the actual EtherType
+
         payload = data[14:]
 
         return cls(dest_mac, src_mac, ether_type, payload)

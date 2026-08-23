@@ -21,11 +21,11 @@ class IPv4Packet:
     def parse(cls, data: bytes):
         version = data[0] >> 4
         if version != 4:
-            raise ValueError('Not an IPv4 packet')
+            raise ValueError('Not an IPv4 packet\n')
     
         ihl = data[0] & 0x0F
         if ihl < 5:
-            raise ValueError('Invalid IHL')
+            raise ValueError('Invalid IHL\n')
         
         header_len = ihl * 4
     
