@@ -26,4 +26,9 @@ class EthernetFrame:
         return cls(dest_mac, src_mac, ether_type, payload)
 
     def __str__(self):
-        return f'src MAC: {self.src_mac}\ndest MAC: {self.dest_mac}\nprotocol: {self.ether_type:#06x}\n'
+        return (
+            f'-- Ethernet frame:\n'
+            f'src MAC: {self.src_mac}\n'
+            f'dest MAC: {self.dest_mac}\n'
+            f'protocol: {self.ether_type:#06x}\n'
+        )

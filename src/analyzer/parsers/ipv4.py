@@ -51,4 +51,9 @@ class IPv4Packet:
                    ttl, protocol, checksum, src_ip, dest_ip, options, payload)
 
     def __str__(self):
-        return f'src IP: {self.src_ip}\ndest IP: {self.dest_ip}\nprotocol: {self.protocol}\n'
+        return (
+            f'-- IPv4 packet:\n'
+            f'src IP: {self.src_ip}\n'
+            f'dest IP: {self.dest_ip}\n'
+            f'protocol: {self.protocol}\n'
+        )
