@@ -1,5 +1,5 @@
 from .capture import PacketCapturer
-from .parsers.ethernet import EthernetFrame
+from .parsers.link import EthernetFrame
 from .parsers.dispatch import parse_network_layer
 
 def main():

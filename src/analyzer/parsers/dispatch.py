@@ -1,4 +1,4 @@
-from .ipv4 import IPv4Packet
+from .network import IPv4Packet
 
 ETHER_TYPE_IPV4 = 0x0800
 ETHER_TYPE_ARP = 0x0806
