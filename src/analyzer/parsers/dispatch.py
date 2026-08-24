@@ -1,5 +1,5 @@
 from .network import IPv4Packet, ARPPacket, IPv6Packet
-from .transport import TCPSegment
+from .transport import TCPSegment, UDPSegment
 
 # ---- PROTO CONSTANTS ----
 
@@ -19,7 +19,8 @@ PARSERS_NETWORK = {
 }
 
 PARSERS_TRANSPORT = {
-    IP_PROTO_TCP : TCPSegment.parse
+    IP_PROTO_TCP : TCPSegment.parse,
+    IP_PROTO_UDP : UDPSegment.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----
