@@ -1,4 +1,4 @@
-from .network import IPv4Packet, ARPPacket
+from .network import IPv4Packet, ARPPacket, IPv6Packet
 
 ETHER_TYPE_IPV4 = 0x0800
 ETHER_TYPE_ARP = 0x0806
@@ -6,7 +6,8 @@ ETHER_TYPE_IPV6 = 0x86DD
 
 PARSERS_NETWORK = {
     ETHER_TYPE_IPV4 : IPv4Packet.parse,
-    ETHER_TYPE_ARP : ARPPacket.parse
+    ETHER_TYPE_ARP : ARPPacket.parse,
+    ETHER_TYPE_IPV6 : IPv6Packet.parse
 }
 
 def parse_network_layer(ether_type: int, data: bytes):
@@ -25,5 +26,5 @@ def parse_network_layer(ether_type: int, data: bytes):
             return None
 
     else:
-        print(f'Uknown protocol: {ether_type:#06x}\n')
+        print(f'Uknown Network Layer protocol: {ether_type:#06x}\n')
         return None
