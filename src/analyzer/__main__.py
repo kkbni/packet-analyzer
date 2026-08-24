@@ -1,6 +1,6 @@
 from .capture import PacketCapturer
 from .parsers.link import EthernetFrame
-from .parsers.dispatch import parse_network_layer
+from .parsers.dispatch import parse_network_layer, parse_transport_layer
 
 def main():
     print('----- Starting capture:\n')
@@ -18,6 +18,11 @@ def main():
         if packet:
             print(packet)
 
+            if packet.ip_proto and packet.payload:
+                segment = parse_transport_layer(packet.ip_proto, packet.payload)
+
+                if segment:
+                    print(segment)
 
 if __name__ == '__main__':
     main()

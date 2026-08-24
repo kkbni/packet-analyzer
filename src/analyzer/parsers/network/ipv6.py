@@ -47,3 +47,7 @@ class IPv6Packet:
             f'dest IP: {self.dest_ip}\n'
             f'protocol: {self.next_header}\n'
         )
+
+    @property
+    def ip_proto(self):
+        return self.next_header

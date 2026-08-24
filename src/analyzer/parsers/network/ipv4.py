@@ -58,3 +58,7 @@ class IPv4Packet:
             f'dest IP: {self.dest_ip}\n'
             f'protocol: {self.protocol}\n'
         )
+
+    @property
+    def ip_proto(self):
+        return self.protocol

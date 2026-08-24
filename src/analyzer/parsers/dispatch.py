@@ -1,4 +1,5 @@
 from .network import IPv4Packet, ARPPacket, IPv6Packet
+from .transport import TCPSegment
 
 # ---- PROTO CONSTANTS ----
 
@@ -18,7 +19,7 @@ PARSERS_NETWORK = {
 }
 
 PARSERS_TRANSPORT = {
-
+    IP_PROTO_TCP : TCPSegment.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----
@@ -43,4 +44,16 @@ def parse_network_layer(ether_type: int, data: bytes):
         return None
 
 def parse_transport_layer(ip_proto: int, data: bytes):
-    pass
+
+    parser = PARSERS_TRANSPORT.get(ip_proto)
+
+    if parser:
+        try:
+            return parser(data)
+        except ValueError as err:
+            print(err)
+            return None
+
+    else:
+        print(f'Uknown Transport Layer protocol: {ip_proto}\n')
+        return None

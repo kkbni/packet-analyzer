@@ -55,3 +55,11 @@ class ARPPacket:
             f'dest MAC: {self.target_hw_addr}\n'
             f'dest IP: {self.target_proto_addr}\n'
         )
+
+    @property
+    def ip_proto(self):
+        return None
+
+    @property
+    def payload(self):
+        return None
