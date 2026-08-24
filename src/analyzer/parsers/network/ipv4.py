@@ -1,8 +1,9 @@
 from dataclasses import dataclass
+import socket
 
 @dataclass
 class IPv4Packet:
-    version: int    # =4 -> ipv4 | =6 -> ipv6
+    version: int    # =4 -> ipv4
     ihl: int    # Internet Header Len - in 32bit words
     tos: int    # Type of Service
     total_len: int
@@ -40,8 +41,8 @@ class IPv4Packet:
         protocol = data[9]
         checksum = int.from_bytes(data[10:12], 'big')
     
-        src_ip = '.'.join( map(str, data[12:16]) )
-        dest_ip = '.'.join( map(str, data[16:20]) )
+        src_ip = socket.inet_ntop(socket.AF_INET, data[12:16])
+        dest_ip = socket.inet_ntop(socket.AF_INET, data[16:20])
     
         # options left if IHL > 5
         options = data[20:header_len] if header_len > 20 else b''
