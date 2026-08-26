@@ -1,4 +1,4 @@
-from .network import IPv4Packet, ARPPacket, IPv6Packet, ICMPv4Message
+from .network import IPv4Packet, ARPPacket, IPv6Packet, ICMPv4Message, ICMPv6Message
 from .transport import TCPSegment, UDPDatagram
 
 # ---- PROTO CONSTANTS ----
@@ -23,7 +23,8 @@ PARSERS_NETWORK = {
 PARSERS_IP_PAYLOAD = {
     IP_PROTO_TCP: TCPSegment.parse,
     IP_PROTO_UDP: UDPDatagram.parse,
-    IP_PROTO_ICMPV4: ICMPv4Message.parse
+    IP_PROTO_ICMPV4: ICMPv4Message.parse,
+    IP_PROTO_ICMPV6: ICMPv6Message.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----
