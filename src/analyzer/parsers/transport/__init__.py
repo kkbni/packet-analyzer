@@ -1,2 +1,2 @@
 from .tcp import TCPSegment
-from .udp import UDPSegment
+from .udp import UDPDatagram

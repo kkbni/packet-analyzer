@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 @dataclass
-class UDPSegment:
+class UDPDatagram:
     src_port: int
     dest_port: int
     length: int
@@ -21,7 +21,7 @@ class UDPSegment:
 
     def __str__(self):
         return (
-            f'-- UDP segment:\n'
+            f'-- UDP datagram:\n'
             f'src port: {self.src_port}\n'
             f'dest port: {self.dest_port}\n'
         )
