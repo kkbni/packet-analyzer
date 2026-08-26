@@ -15,15 +15,15 @@ IP_PROTO_ICMPV6 =  58
 # ---- DISPATCH MAPS ----
 
 PARSERS_NETWORK = {
-    ETHER_TYPE_IPV4 : IPv4Packet.parse,
-    ETHER_TYPE_ARP : ARPPacket.parse,
-    ETHER_TYPE_IPV6 : IPv6Packet.parse
+    ETHER_TYPE_IPV4: IPv4Packet.parse,
+    ETHER_TYPE_ARP: ARPPacket.parse,
+    ETHER_TYPE_IPV6: IPv6Packet.parse
 }
 
 PARSERS_IP_PAYLOAD = {
-    IP_PROTO_TCP : TCPSegment.parse,
-    IP_PROTO_UDP : UDPDatagram.parse,
-    IP_PROTO_ICMPV4 : ICMPv4Message.parse
+    IP_PROTO_TCP: TCPSegment.parse,
+    IP_PROTO_UDP: UDPDatagram.parse,
+    IP_PROTO_ICMPV4: ICMPv4Message.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----

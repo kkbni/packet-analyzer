@@ -32,16 +32,16 @@ class ICMPv4Message:
 
     def __str__(self):
         type_map = {
-            0 : 'Echo Reply',
-            3 : 'Destination Unreachable',
-            5 : 'Redirect Message',
-            8 : 'Echo Request',
-            9 : 'Router Advertisement',
-            10 : 'Router Solicitation',
-            11 : 'Time Exceeded',
-            12 : 'Parameter Problem',
-            13 : 'Timestamp',
-            14 : 'Timestamp Reply'
+            0:  'Echo Reply',
+            3: 'Destination Unreachable',
+            5: 'Redirect Message',
+            8: 'Echo Request',
+            9: 'Router Advertisement',
+            10: 'Router Solicitation',
+            11: 'Time Exceeded',
+            12: 'Parameter Problem',
+            13: 'Timestamp',
+            14: 'Timestamp Reply'
         }
 
         type_str = type_map.get(self.type, 'Uknown')

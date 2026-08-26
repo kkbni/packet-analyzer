@@ -1,16 +1,17 @@
 from dataclasses import dataclass
+import socket
 
 @dataclass
 class ARPPacket:
-    hw_type : int # 1 -> Ethernet
+    hw_type: int # 1 -> Ethernet
     protocol: int # 0x0800 -> IPv4
-    hw_addr_len : int # len of MAC = 6
-    proto_addr_len : int # len of IPv4 = 4
-    operation : int # 1 -> req | 2 -> rep
-    sender_hw_addr : str # sender MAC
-    sender_proto_addr : str # sender IP
+    hw_addr_len: int # len of MAC = 6
+    proto_addr_len: int # len of IPv4 = 4
+    operation: int # 1 -> req | 2 -> rep
+    sender_hw_addr: str # sender MAC
+    sender_proto_addr: str # sender IP
     target_hw_addr: str # target MAC
-    target_proto_addr : str # target IP
+    target_proto_addr: str # target IP
 
     @classmethod
     def parse(cls, data : bytes):
@@ -33,9 +34,9 @@ class ARPPacket:
 
         operation = int.from_bytes(data[6:8], 'big')
         sender_mac = data[8:14].hex(':')
-        sender_ip = '.'.join( map(str, data[14:18]) )
+        sender_ip = socket.inet_ntop(socket.AF_INET, data[14:18])
         target_mac = data[18:24].hex(':')
-        target_ip = '.'.join( map(str, data[24:28]) )
+        target_ip = socket.inet_ntop(socket.AF_INET, data[24:28])
 
         return cls(hw_type, protocol, hw_addr_len, proto_addr_len, operation, 
                    sender_mac, sender_ip, target_mac, target_ip)
