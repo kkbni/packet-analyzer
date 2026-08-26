@@ -1,4 +1,4 @@
-from .network import IPv4Packet, ARPPacket, IPv6Packet
+from .network import IPv4Packet, ARPPacket, IPv6Packet, ICMPv4Message
 from .transport import TCPSegment, UDPDatagram
 
 # ---- PROTO CONSTANTS ----
@@ -9,6 +9,8 @@ ETHER_TYPE_IPV6 = 0x86DD
 
 IP_PROTO_TCP = 6
 IP_PROTO_UDP = 17
+IP_PROTO_ICMPV4 = 1
+IP_PROTO_ICMPV6 =  58
 
 # ---- DISPATCH MAPS ----
 
@@ -18,9 +20,10 @@ PARSERS_NETWORK = {
     ETHER_TYPE_IPV6 : IPv6Packet.parse
 }
 
-PARSERS_TRANSPORT = {
+PARSERS_IP_PAYLOAD = {
     IP_PROTO_TCP : TCPSegment.parse,
-    IP_PROTO_UDP : UDPDatagram.parse
+    IP_PROTO_UDP : UDPDatagram.parse,
+    IP_PROTO_ICMPV4 : ICMPv4Message.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----
@@ -44,9 +47,9 @@ def parse_network_layer(ether_type: int, data: bytes):
         print(f'Uknown Network Layer protocol: {ether_type:#06x}\n')
         return None
 
-def parse_transport_layer(ip_proto: int, data: bytes):
+def parse_ip_payload(ip_proto: int, data: bytes):
 
-    parser = PARSERS_TRANSPORT.get(ip_proto)
+    parser = PARSERS_IP_PAYLOAD.get(ip_proto)
 
     if parser:
         try:
@@ -56,5 +59,5 @@ def parse_transport_layer(ip_proto: int, data: bytes):
             return None
 
     else:
-        print(f'Uknown Transport Layer protocol: {ip_proto}\n')
+        print(f'Uknown protocol in IP payload: {ip_proto}\n')
         return None
