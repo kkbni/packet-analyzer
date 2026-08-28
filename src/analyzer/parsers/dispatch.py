@@ -1,5 +1,6 @@
 from .network import IPv4Packet, ARPPacket, IPv6Packet, ICMPv4Message, ICMPv6Message
 from .transport import TCPSegment, UDPDatagram
+from .application import DNSMessage
 
 # ---- PROTO CONSTANTS ----
 
@@ -11,6 +12,8 @@ IP_PROTO_TCP = 6
 IP_PROTO_UDP = 17
 IP_PROTO_ICMPV4 = 1
 IP_PROTO_ICMPV6 =  58
+
+APP_PORT_DNS = 53
 
 # ---- DISPATCH MAPS ----
 
@@ -25,6 +28,10 @@ PARSERS_IP_PAYLOAD = {
     IP_PROTO_UDP: UDPDatagram.parse,
     IP_PROTO_ICMPV4: ICMPv4Message.parse,
     IP_PROTO_ICMPV6: ICMPv6Message.parse
+}
+
+PARSERS_APPLICATION = {
+    APP_PORT_DNS: DNSMessage.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----
@@ -62,3 +69,17 @@ def parse_ip_payload(ip_proto: int, data: bytes):
     else:
         print(f'Uknown protocol in IP payload: {ip_proto}\n')
         return None
+
+def parse_application_layer(ports: tuple[int, int], data: bytes):
+    src_port, dest_port = ports
+
+    parser = PARSERS_APPLICATION.get(src_port) or PARSERS_APPLICATION.get(dest_port)
+
+    if parser:
+        try:
+            return parser(data)
+        except ValueError as err:
+            print(err)
+            return None
+
+    return None
