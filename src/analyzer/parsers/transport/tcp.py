@@ -67,3 +67,7 @@ class TCPSegment:
             f'dest port: {self.dest_port}\n'
             f'flags: {flags_str}\n'
         )
+
+    @property
+    def application_ports(self):
+        return (self.src_port, self.dest_port)

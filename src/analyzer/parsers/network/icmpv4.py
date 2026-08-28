@@ -59,3 +59,7 @@ class ICMPv4Message:
             f'type: ({self.type}) {type_str}\n'
             f'{info_str}'
         )
+
+    @property
+    def application_ports(self):
+        return None
