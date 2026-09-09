@@ -3,7 +3,7 @@ import socket
 ETH_P_ALL = 0x0003 # proto for every packet
 
 class PacketCapturer:
-    def __init__(self, interface : str):
+    def __init__(self, interface: str):
         self.interface = interface
 
         self.socket = socket.socket(
@@ -16,5 +16,5 @@ class PacketCapturer:
 
     def capture(self):
         while True:
-            data, addr = self.socket.recvfrom(1024)
+            data, _ = self.socket.recvfrom(1024)
             yield data

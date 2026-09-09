@@ -73,9 +73,10 @@ class HTTPMessage:
 
             return cls(version, headers, body, status_code=status_code, reason=reason)
 
-        version = parts[2].strip()
-        if len(parts) != 3 or not version.startswith('HTTP/'):
+        if len(parts) != 3 or not parts[2].startswith('HTTP/'):
             raise ValueError('HTTP message: invalid request line')
+
+        version = parts[2].strip()
 
         if version not in cls.SUPPORTED_VERSIONS:
             raise ValueError(f'HTTP message: unsupported version -> {version}\n')

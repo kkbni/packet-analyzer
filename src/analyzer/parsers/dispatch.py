@@ -54,7 +54,7 @@ def parse_network_layer(ether_type: int, data: bytes):
             return None
 
     else:
-        print(f'Uknown Network Layer protocol: {ether_type:#06x}\n')
+        print(f'Unknown Network Layer protocol: {ether_type:#06x}\n')
         return None
 
 def parse_ip_payload(ip_proto: int, data: bytes):
@@ -69,7 +69,7 @@ def parse_ip_payload(ip_proto: int, data: bytes):
             return None
 
     else:
-        print(f'Uknown protocol in IP payload: {ip_proto}\n')
+        print(f'Unknown protocol in IP payload: {ip_proto}\n')
         return None
 
 def parse_application_layer(ports: tuple[int, int], data: bytes):
