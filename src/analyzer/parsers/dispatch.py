@@ -1,3 +1,4 @@
+from .link import EthernetFrame
 from .network import IPv4Packet, ARPPacket, IPv6Packet, ICMPv4Message, ICMPv6Message
 from .transport import TCPSegment, UDPDatagram
 from .application import DNSMessage, HTTPMessage
@@ -37,6 +38,16 @@ PARSERS_APPLICATION = {
 }
 
 # ---- DISPATCH FUNCTIONS ----
+
+def parse_link_layer(data: bytes):
+
+    parser = EthernetFrame.parse
+
+    try:
+        return parser(data)
+    except ValueError as err:
+        print(err)
+        return None
 
 def parse_network_layer(ether_type: int, data: bytes):
 
