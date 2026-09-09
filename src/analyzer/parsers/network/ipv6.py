@@ -17,13 +17,19 @@ class IPv6Packet:
 
     @classmethod
     def parse(cls, data: bytes):
+        if len(data) < 40:
+            raise ValueError('IPv6 packet: incomplete header')
+
         version = data[0] >> 4
         if version != 6:
             raise ValueError(f'IPv6 packet: invalid version - {version}\n')
 
         traffic_class = ( int.from_bytes(data[0:2], 'big') >> 4 )& 0x00FF
         flow_label = int.from_bytes(data[1:4], 'big') & 0x0FFFFF
+        
         payload_len = int.from_bytes(data[4:6], 'big')
+        if 40 + payload_len > len(data):
+            raise ValueError('IPv6 packet: payload is truncated')
 
         next_header = data[6]
         if next_header in EXTENSION_HEADERS:

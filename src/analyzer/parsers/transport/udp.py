@@ -10,9 +10,14 @@ class UDPDatagram:
 
     @classmethod
     def parse(cls, data: bytes):
+        if len(data) < 8:
+            raise ValueError('UDP datagram: incomplete header')
+
         src_port = int.from_bytes(data[0:2], 'big')
         dest_port = int.from_bytes(data[2:4], 'big')
         length = int.from_bytes(data[4:6], 'big')
+        if length < 8 or length > len(data):
+            raise ValueError('UDP datagram: invalid length')
         checksum = int.from_bytes(data[6:8], 'big')
 
         payload = data[8:length]

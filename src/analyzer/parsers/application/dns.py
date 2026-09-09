@@ -13,6 +13,8 @@ class ResourceRecord:
     @classmethod
     def parse(cls, data: bytes, offset: int, parse_func) -> tuple['ResourceRecord', int]: # -> (ResourceRecord, offset)
         name, offset = parse_func(data, offset)
+        if len(data[offset:]) < 10:
+            raise ValueError('DNS recourse record: incomplete header')
 
         record_type = int.from_bytes(data[ offset : offset + 2], 'big')
         offset += 2
@@ -23,14 +25,26 @@ class ResourceRecord:
         data_len = int.from_bytes(data[ offset : offset + 2], 'big')
         offset += 2
 
+        if data_len > len(data) - offset:
+            raise ValueError('DNS resource record: data is truncated')
+
         data_bytes = data[ offset : offset + data_len ]
 
-        if record_type == 1 and data_len == 4: # A record (IPv4)
+        if record_type == 1: # A record (IPv4)
+            if data_len != 4:
+                raise ValueError('DNS resource record: invalid A record length')
             interpreted_data = socket.inet_ntop(socket.AF_INET, data_bytes)
-        elif record_type == 5: # Canonical DNS name (CNAME)
-            interpreted_data, _ = parse_func(data, offset)
-        elif record_type == 28 and data_len == 16: # AAAA record (IPv6)
+
+        elif record_type == 5: # Canonical DNS Name (CNAME)
+            interpreted_data, name_end = parse_func(data, offset)
+            if name_end > offset + data_len:
+                raise ValueError('DNS resource record: CNAME data is truncated')
+            
+        elif record_type == 28: # AAAA record (IPv6)
+            if data_len != 16:
+                raise ValueError('DNS resource record: invalid AAAA record length')
             interpreted_data = socket.inet_ntop(socket.AF_INET6, data_bytes)
+
         else:
             interpreted_data = f'<raw>: {data_bytes.hex()}'
 
@@ -49,9 +63,7 @@ class ResourceRecord:
         type_str = type_map.get(self.record_type, 'Unknown')
 
         name = self.name if self.name else '<Root>'
-        data = self.data if self.name else '' 
-
-        return f'{name} ({type_str}): {data}'
+        return f'{name} ({type_str}): {self.data}'
 
 @dataclass
 class DNSMessage:
@@ -79,14 +91,23 @@ class DNSMessage:
     @classmethod
     # A helper to parse DNS names and names through compression pointers in the header
     def _parse_name(cls, data: bytes, start_offset: int) -> tuple[str, int]: # -> (name, start_offset)
-        parts = [] # parts of the domain name (subdomains)
+        if start_offset >= len(data):
+            raise ValueError('DNS name: offset is outside packet')
+
+        parts = [] # parts of the domain name
         cur_offset = start_offset
         # cur_offset -> used offset for current reading
         # start_offset -> returned offset for the next reading
         jumped = False # if a pointer was used
+        visited_offsets = set() # to check for pointer loops
 
-        # parsing parts of DNS name:
         while True:
+            if cur_offset >= len(data):
+                raise ValueError('DNS name: data is truncated')
+            if cur_offset in visited_offsets:
+                raise ValueError('DNS name: compression pointer loop')
+            visited_offsets.add(cur_offset)
+
             part_len = data[cur_offset]
 
             if part_len == 0:
@@ -95,18 +116,29 @@ class DNSMessage:
                 break
 
             if ( part_len & 0xC0 ) == 0xC0: # if first two bits are '11' it's a 2-byte ptr
+                if cur_offset + 1 >= len(data):
+                    raise ValueError('DNS name: compression pointer is truncated')
 
                 if not jumped: # advance the start_offset only after the original ptr
                     start_offset += 2
 
-                # follow the ptr for next parts
                 cur_offset = int.from_bytes(data[ cur_offset : cur_offset + 2 ], 'big') & 0x3FFF
+                if cur_offset >= len(data):
+                    raise ValueError('DNS name: compression pointer is outside packet')
                 jumped = True
+
+            elif part_len & 0xC0:
+                raise ValueError('DNS name: invalid label length')
 
             else:
                 cur_offset += 1 # skip the part_len byte
+                if cur_offset + part_len > len(data):
+                    raise ValueError('DNS name: label is truncated')
 
-                part = data[ cur_offset : cur_offset + part_len ].decode('utf-8')
+                try:
+                    part = data[ cur_offset : cur_offset + part_len ].decode('utf-8')
+                except UnicodeDecodeError as err:
+                    raise ValueError('DNS name: invalid encoding') from err
                 parts.append(part)
 
                 cur_offset += part_len # skip the part
@@ -120,6 +152,8 @@ class DNSMessage:
 
     @classmethod
     def parse(cls, data: bytes):
+        if len(data) < 12:
+            raise ValueError('DNS message: incomplete header')
 
         identification = int.from_bytes(data[0:2], 'big')
         flags = int.from_bytes(data[2:4], 'big')
@@ -143,6 +177,9 @@ class DNSMessage:
         for _ in range(qdcount):
             name, offset = cls._parse_name(data, offset)
             queries.append(name)
+
+            if len(data[offset:]) < 4:
+                raise ValueError('DNS question: incomplete data')
 
             # skip q_type (2 bytes)
             # skip q_class (2 bytes)

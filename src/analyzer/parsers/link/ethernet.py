@@ -9,7 +9,8 @@ class EthernetFrame:
 
     @classmethod
     def parse(cls, data: bytes):
-        # parse raw bytes and return an EthernetFrame object
+        if len(data) < 14:
+            raise ValueError('Ethernet frame: incomplete header')
 
         dest_mac = data[0:6].hex(':')
         src_mac = data[6:12].hex(':')

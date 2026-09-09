@@ -23,6 +23,9 @@ class TCPSegment:
 
     @classmethod
     def parse(cls, data: bytes):
+        if len(data) < 20:
+            raise ValueError('TCP segment: incomplete header')
+
         src_port = int.from_bytes(data[0:2], 'big')
         dest_port = int.from_bytes(data[2:4], 'big')
         seq_num = int.from_bytes(data[4:8], 'big')
@@ -42,6 +45,8 @@ class TCPSegment:
         urgent_ptr = int.from_bytes(data[18:20], 'big')
 
         header_len = data_offset * 4
+        if data_offset < 5 or header_len > len(data):
+            raise ValueError('TCP segment: invalid data offset')
         options = data[20:header_len] if header_len > 20 else b''
 
         payload = data[header_len:]

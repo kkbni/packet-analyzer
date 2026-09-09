@@ -14,7 +14,10 @@ class ARPPacket:
     target_proto_addr: str # target IP
 
     @classmethod
-    def parse(cls, data : bytes):
+    def parse(cls, data: bytes):
+        if len(data) < 28:
+            raise ValueError('ARP packet: incomplete header')
+
         hw_type = int.from_bytes(data[0:2], 'big')
         protocol = int.from_bytes(data[2:4], 'big')
 
@@ -38,8 +41,10 @@ class ARPPacket:
         target_mac = data[18:24].hex(':')
         target_ip = socket.inet_ntop(socket.AF_INET, data[24:28])
 
-        return cls(hw_type, protocol, hw_addr_len, proto_addr_len, operation, 
-                   sender_mac, sender_ip, target_mac, target_ip)
+        return cls(
+            hw_type, protocol, hw_addr_len, proto_addr_len, operation,
+            sender_mac, sender_ip, target_mac, target_ip
+        )
 
     def __str__(self):
         op_map = {

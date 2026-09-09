@@ -12,7 +12,10 @@ class ICMPv4Message:
 
     @classmethod
     def parse(cls, data: bytes):
-        type = data[0]
+        if len(data) < 8:
+            raise ValueError('ICMPv4 message: incomplete header')
+
+        message_type = data[0]
         code = data[1]
         checksum = int.from_bytes(data[2:4], 'big')
 
@@ -20,7 +23,7 @@ class ICMPv4Message:
         seq_num = 0
         extended_header = b''
 
-        if type in (0, 8):
+        if message_type in (0, 8):
             identifier = int.from_bytes(data[4:6], 'big')
             seq_num = int.from_bytes(data[6:8], 'big')
         else:
@@ -28,7 +31,7 @@ class ICMPv4Message:
 
         payload = data[8:]
 
-        return cls(type, code, checksum, identifier, seq_num, extended_header, payload)
+        return cls(message_type, code, checksum, identifier, seq_num, extended_header, payload)
 
     def __str__(self):
         type_map = {
@@ -44,7 +47,7 @@ class ICMPv4Message:
             14: 'Timestamp Reply'
         }
 
-        type_str = type_map.get(self.type, 'Uknown')
+        type_str = type_map.get(self.type, 'Unknown')
 
         if self.type in (0, 8):
             info_str = (

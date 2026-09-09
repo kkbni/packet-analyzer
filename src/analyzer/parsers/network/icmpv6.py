@@ -12,7 +12,10 @@ class ICMPv6Message:
 
     @classmethod
     def parse(cls, data: bytes):
-        type = data[0]
+        if len(data) < 8:
+            raise ValueError('ICMPv6 message: incomplete header')
+
+        message_type = data[0]
         code = data[1]
         checksum = int.from_bytes(data[2:4], 'big')
 
@@ -20,7 +23,7 @@ class ICMPv6Message:
         seq_num = 0
         extended_header = b''
 
-        if type in (128, 129):
+        if message_type in (128, 129):
             identifier = int.from_bytes(data[4:6], 'big')
             seq_num = int.from_bytes(data[6:8], 'big')
         else:
@@ -28,7 +31,7 @@ class ICMPv6Message:
 
         payload = data[8:]
 
-        return cls(type, code, checksum, identifier, seq_num, extended_header, payload)
+        return cls(message_type, code, checksum, identifier, seq_num, extended_header, payload)
 
     def __str__(self):
         type_map = {
@@ -40,7 +43,7 @@ class ICMPv6Message:
             129: 'Echo Reply',
             130: 'Multicast Listener Query',
             131: 'Multicast Listener Report',
-            132: ' Multicast Listener Done',
+            132: 'Multicast Listener Done',
             133: 'Router Solicitation',
             134: 'Router Advertisement',
             135: 'Neighbor Solicitation',
@@ -48,7 +51,7 @@ class ICMPv6Message:
             137: 'Redirect'
         }
 
-        type_str = type_map.get(self.type, 'Uknown')
+        type_str = type_map.get(self.type, 'Unknown')
 
         if self.type in (128, 129):
             info_str = (
