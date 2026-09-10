@@ -18,7 +18,7 @@ class IPv6Packet:
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 40:
-            raise ValueError('IPv6 packet: incomplete header')
+            raise ValueError('IPv6 packet: incomplete header\n')
 
         version = data[0] >> 4
         if version != 6:
@@ -29,7 +29,7 @@ class IPv6Packet:
         
         payload_len = int.from_bytes(data[4:6], 'big')
         if 40 + payload_len > len(data):
-            raise ValueError('IPv6 packet: payload is truncated')
+            raise ValueError('IPv6 packet: payload is truncated\n')
 
         next_header = data[6]
         if next_header in EXTENSION_HEADERS:

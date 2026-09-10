@@ -34,7 +34,7 @@ class HTTPMessage:
         
         headers_data, separator, body = data.partition(b'\r\n\r\n')
         if not separator:
-            raise ValueError('HTTP message: incomplete headers')
+            raise ValueError('HTTP message: incomplete headers\n')
 
         lines = headers_data.split(b'\r\n')
         try:
@@ -42,7 +42,7 @@ class HTTPMessage:
             header_lines = [ line.decode('iso-8859-1') for line in lines[1:] ]
 
         except UnicodeDecodeError as err:
-            raise ValueError('HTTP message: invalid encoding') from err
+            raise ValueError('HTTP message: invalid encoding\n') from err
 
         headers = {}
         for line in header_lines:
@@ -51,19 +51,19 @@ class HTTPMessage:
 
             name, separator, value = line.partition(':')
             if not separator or not name:
-                raise ValueError('HTTP message: invalid header')
+                raise ValueError('HTTP message: invalid header\n')
             
             headers[ name.strip().lower() ] = value.strip()
 
         parts = start_line.split(' ', 2)
         if start_line.startswith('HTTP/'):
             if len(parts) < 2:
-                raise ValueError('HTTP message: invalid response line')
+                raise ValueError('HTTP message: invalid response line\n')
             
             try:
                 status_code = int(parts[1])
             except ValueError as err:
-                raise ValueError('HTTP message: invalid status code') from err
+                raise ValueError('HTTP message: invalid status code\n') from err
 
             version = parts[0].strip()
             reason = parts[2].strip() if len(parts) == 3 else ''
@@ -74,7 +74,7 @@ class HTTPMessage:
             return cls(version, headers, body, status_code=status_code, reason=reason)
 
         if len(parts) != 3 or not parts[2].startswith('HTTP/'):
-            raise ValueError('HTTP message: invalid request line')
+            raise ValueError('HTTP message: invalid request line\n')
 
         version = parts[2].strip()
 
@@ -114,7 +114,7 @@ class HTTPMessage:
             if len(self.body) > body_len_lim:
                 output_str += (
                     f'{body_str}\n'
-                    f'... <truncated> ...\n'
+                    f'... <Truncated> ...\n'
                 )
             else:
                 output_str += f'{body_str}\n'

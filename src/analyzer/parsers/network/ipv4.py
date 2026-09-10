@@ -21,7 +21,7 @@ class IPv4Packet:
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 20:
-            raise ValueError('IPv4 packet: incomplete header')
+            raise ValueError('IPv4 packet: incomplete header\n')
 
         version = data[0] >> 4
         if version != 4:
@@ -33,13 +33,13 @@ class IPv4Packet:
         
         header_len = ihl * 4
         if header_len > len(data):
-            raise ValueError('IPv4 packet: header is truncated')
+            raise ValueError('IPv4 packet: header is truncated\n')
     
         tos = data[1]
         
         total_len = int.from_bytes(data[2:4], 'big')
         if total_len < header_len or total_len > len(data):
-            raise ValueError('IPv4 packet: invalid total length')
+            raise ValueError('IPv4 packet: invalid total length\n')
         
         identification = int.from_bytes(data[4:6], 'big')
     

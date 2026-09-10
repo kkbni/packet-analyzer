@@ -16,7 +16,7 @@ class ARPPacket:
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 28:
-            raise ValueError('ARP packet: incomplete header')
+            raise ValueError('ARP packet: incomplete header\n')
 
         hw_type = int.from_bytes(data[0:2], 'big')
         protocol = int.from_bytes(data[2:4], 'big')
