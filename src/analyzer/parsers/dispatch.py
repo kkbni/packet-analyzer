@@ -1,7 +1,7 @@
 from .link import EthernetFrame
 from .network import IPv4Packet, ARPPacket, IPv6Packet, ICMPv4Message, ICMPv6Message
 from .transport import TCPSegment, UDPDatagram
-from .application import DNSMessage, HTTPMessage
+from .application import DNSMessage, HTTPMessage, TLSMessage
 
 # ---- PROTO CONSTANTS ----
 
@@ -16,6 +16,7 @@ IP_PROTO_ICMPV6 =  58
 
 APP_PORT_DNS = 53
 APP_PORT_HTTP = 80
+APP_PORT_HTTPS = 443
 
 # ---- DISPATCH MAPS ----
 
@@ -34,7 +35,8 @@ PARSERS_IP_PAYLOAD = {
 
 PARSERS_APPLICATION = {
     APP_PORT_DNS: DNSMessage.parse,
-    APP_PORT_HTTP: HTTPMessage.parse
+    APP_PORT_HTTP: HTTPMessage.parse,
+    APP_PORT_HTTPS: TLSMessage.parse
 }
 
 # ---- DISPATCH FUNCTIONS ----
