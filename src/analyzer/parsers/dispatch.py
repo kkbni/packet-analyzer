@@ -39,6 +39,20 @@ PARSERS_APPLICATION = {
     APP_PORT_HTTPS: TLSMessage.parse
 }
 
+# ---- HELPER CLASS ----
+
+class CorruptedLayer:
+    # dummy PDU with exception data
+
+    def __init__(self, error: Exception | str):
+        self.error = error
+
+    def __str__(self):
+        return (
+            f'--- CORRUPTED LAYER:\n'
+            f'{self.error}\n'
+            )
+
 # ---- DISPATCH FUNCTIONS ----
 
 def parse_link_layer(data: bytes):
@@ -47,28 +61,24 @@ def parse_link_layer(data: bytes):
 
     try:
         return parser(data)
-    except ValueError as err:
-        print(err)
-        return None
+    except Exception as err:
+        return CorruptedLayer(err)
 
 def parse_network_layer(ether_type: int, data: bytes):
 
     if not ether_type:
-        print('IEEE 802.3 frame - skipped\n')
-        return None
+        return CorruptedLayer('IEEE 802.3 frame - skipped')
 
     parser = PARSERS_NETWORK.get(ether_type)
 
     if parser:
         try:
             return parser(data)
-        except ValueError as err:
-            print(err)
-            return None
+        except Exception as err:
+            return CorruptedLayer(err)
 
     else:
-        print(f'Unknown Network Layer protocol: {ether_type:#06x}\n')
-        return None
+        return CorruptedLayer(f'Unknown Network Layer protocol: {ether_type:#06x}')
 
 def parse_ip_payload(ip_proto: int, data: bytes):
 
@@ -77,13 +87,11 @@ def parse_ip_payload(ip_proto: int, data: bytes):
     if parser:
         try:
             return parser(data)
-        except ValueError as err:
-            print(err)
-            return None
+        except Exception as err:
+            return CorruptedLayer(err)
 
     else:
-        print(f'Unknown protocol in IP payload: {ip_proto}\n')
-        return None
+        return CorruptedLayer(f'Unknown protocol in IP payload: {ip_proto}')
 
 def parse_application_layer(ports: tuple[int, int], data: bytes):
     src_port, dest_port = ports
@@ -93,8 +101,7 @@ def parse_application_layer(ports: tuple[int, int], data: bytes):
     if parser:
         try:
             return parser(data)
-        except ValueError as err:
-            print(err)
-            return None
+        except Exception as err:
+            return CorruptedLayer(err)
 
     return None
