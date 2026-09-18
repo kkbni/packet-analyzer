@@ -79,7 +79,7 @@ class TCPSegment:
 
     def info(self):
         flags_str = self._get_flags_str()
-        return f'ports: {self.src_port} -> {self.dest_port}, seq: {self.seq_num}, flags: {flags_str}'
+        return f'Ports: {self.src_port} -> {self.dest_port}, seq: {self.seq_num}, flags: {flags_str}'
 
     @property
     def application_ports(self):
