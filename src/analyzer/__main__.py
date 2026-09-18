@@ -9,6 +9,10 @@ from .parsers.dispatch import CorruptedLayer, \
     parse_link_layer, parse_network_layer, \
     parse_ip_payload, parse_application_layer
 
+MAX_ID_STR_LEN = 3
+MAX_IP_STR_LEN = 35
+MAX_PROTO_STR_LEN = 15
+
 packet_history = {}
 packet_queue = queue.Queue()
 
@@ -90,20 +94,38 @@ def main():
                     '----- Entered COMMAND MODE -----\n'
                     '( packet capture is running in the background )'
                     )
+                last_id = None
+                
                 while command_mode:
                     cmd = input('cmd> ').strip().lower()
 
                     if cmd.isdigit():
                         packet_id = int(cmd)
-                        if packet_id in packet_history:
-                            print(f'----- Packet {packet_id} -----\n')
+                        if packet_id not in packet_history:
+                            print(f'Packet {packet_id} has not been captured yet.\n')
+                            continue
 
-                            for layer in packet_history[packet_id]:
-                                if layer: print(layer)
+                        last_id = packet_id
 
-                            print('-' * 20 + '\n')
-                        else:
-                            print(f'Packet {packet_id} not found\n')
+
+                    elif cmd in ('n', 'next'):
+                        if last_id is None:
+                            print('No packet viewed by ID before.\n')
+                            continue
+
+                        packet_id = last_id + 1
+                        if packet_id not in packet_history:
+                            print(f'Packet {packet_id} has not been captured yet.\n')
+                            continue
+
+                        last_id = packet_id
+
+                    elif cmd in ('p', 'prev'):
+                        if last_id is None:
+                            print('No packet viewed by ID before.\n')
+                            continue
+                        packet_id = max(last_id - 1, 1)
+                        last_id = packet_id
 
                     elif cmd in ('q', 'quit'):
                         print('\nShutting down.\n')
@@ -120,6 +142,8 @@ def main():
                             '\n'
                             '* In COMMAND MODE:\n'
                             '[id]       - Inspect a specific packet by its ID (e.g. 42)\n'
+                            'n, next    - Inspect the next packet\n'
+                            'p, prev    - Inspect the previous packet\n'
                             'r, resume  - Exit COMMAND MODE and resume the live feed\n'
                             'h, help    - Show this MANUAL\n'
                             'q, quit    - SHUT DOWN the application\n'
@@ -133,6 +157,12 @@ def main():
                             'Unrecognised command.\n'
                             'For help type \'h\' or \'help\'.\n'
                             )
+
+                    if cmd.isdigit() or cmd in ('n', 'next', 'p', 'prev'):
+                        print(f'----- Packet {packet_id} -----\n')
+                        for layer in packet_history[packet_id]:
+                            if layer: print(layer)
+                        print('-' * 20 + '\n')
                         
             while not packet_queue.empty():
                 packet_id = packet_queue.get()
@@ -145,11 +175,16 @@ def main():
                 if net and not isinstance(net, CorruptedLayer):
                     src_ip, dest_ip = (net.src_ip, net.dest_ip)
 
-                info_str = highest_layer.info() if hasattr(highest_layer, 'info') else ''
-                display_str = f'{highest_layer_proto}'
-                if info_str: display_str += f' | {info_str}'
+                display_id_str = f'{packet_id:>{MAX_ID_STR_LEN}}'
 
-                print(f'{packet_id} | {src_ip} -> {dest_ip} | {display_str}')
+                ip_str = f'{src_ip} -> {dest_ip}'
+                display_ip_str = f'{ip_str:<{MAX_IP_STR_LEN}}'
+                info_str = highest_layer.info() if hasattr(highest_layer, 'info') else ''
+
+                display_info_str = f'{highest_layer_proto:<{MAX_PROTO_STR_LEN}}'
+                if info_str: display_info_str += f' | {info_str}'
+
+                print(f'{display_id_str} | {display_ip_str} | {display_info_str}')
 
             time.sleep(0.05)
 
