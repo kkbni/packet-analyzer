@@ -130,16 +130,18 @@ def main():
                 packet_id = packet_queue.get()
                 link, net, inner, app = packet_history[packet_id]
 
-                if app: info = f'{type(app).__name__}'
-                elif inner: info = f'{type(inner).__name__}'
-                elif net: info = f'{type(net).__name__}'
-                else: info = f'{type(link).__name__}'
+                highest_layer = app or inner or net or link
+                highest_layer_proto = f'{type(highest_layer).__name__}'
 
                 src_ip, dest_ip = ('Unknown', 'Unknown')
                 if net and not isinstance(net, CorruptedLayer):
                     src_ip, dest_ip = (net.src_ip, net.dest_ip)
 
-                print(f'{packet_id} | {src_ip} -> {dest_ip} | {info}')
+                info_str = highest_layer.info() if hasattr(highest_layer, 'info') else ''
+                display_str = f'{highest_layer_proto}'
+                if info_str: display_str += f' | {info_str}'
+
+                print(f'{packet_id} | {src_ip} -> {dest_ip} | {display_str}')
 
             time.sleep(0.05)
 

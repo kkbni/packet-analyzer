@@ -2,18 +2,6 @@ from dataclasses import dataclass
 
 @dataclass
 class HTTPMessage:
-    SUPPORTED_VERSIONS = (
-        'HTTP/1.0',
-        'HTTP/1.1'
-    )
-    # with spaces to reduce probability 
-    # of matching random binary data
-    VALID_START_KEYWORDS = ( 
-        b'GET ', b'POST ', b'PUT ', b'DELETE ', b'HEAD ', 
-        b'OPTIONS ', b'PATCH ', b'TRACE ', b'CONNECT ', 
-        b'HTTP/'
-    )
-
     version: str # HTTP/1.1
     headers: dict[str, str]
     body: bytes
@@ -22,14 +10,26 @@ class HTTPMessage:
     status_code: int | None = None
     reason: str | None = None
 
+    _SUPPORTED_VERSIONS = (
+        'HTTP/1.0',
+        'HTTP/1.1'
+    )
+    # with spaces to reduce probability 
+    # of matching random binary data
+    _VALID_START_KEYWORDS = ( 
+        b'GET ', b'POST ', b'PUT ', b'DELETE ', b'HEAD ', 
+        b'OPTIONS ', b'PATCH ', b'TRACE ', b'CONNECT ', 
+        b'HTTP/'
+    )
+
     @classmethod
     def parse(cls, data: bytes):
         # check if the start is a valid HTTP/1.x keyword in plain text
         # if not -> the version used is unsupported
-        if not data.startswith(cls.VALID_START_KEYWORDS):
+        if not data.startswith(cls._VALID_START_KEYWORDS):
             raise ValueError(
                 f'HTTP message:\n'
-                f'the version is not in SUPPORTED_VERSIONS -> {cls.SUPPORTED_VERSIONS}\n'
+                f'the version is not in SUPPORTED_VERSIONS -> {cls._SUPPORTED_VERSIONS}\n'
             )
         
         headers_data, separator, body = data.partition(b'\r\n\r\n')
@@ -68,7 +68,7 @@ class HTTPMessage:
             version = parts[0].strip()
             reason = parts[2].strip() if len(parts) == 3 else ''
 
-            if version not in cls.SUPPORTED_VERSIONS:
+            if version not in cls._SUPPORTED_VERSIONS:
                 raise ValueError(f'HTTP message: unsupported version -> {version}')
 
             return cls(version, headers, body, status_code=status_code, reason=reason)
@@ -78,7 +78,7 @@ class HTTPMessage:
 
         version = parts[2].strip()
 
-        if version not in cls.SUPPORTED_VERSIONS:
+        if version not in cls._SUPPORTED_VERSIONS:
             raise ValueError(f'HTTP message: unsupported version -> {version}')
 
         method = parts[0].strip()
@@ -119,5 +119,14 @@ class HTTPMessage:
             else:
                 output_str += f'{body_str}\n'
                 
-
         return output_str
+
+    def info(self):
+        if self.status_code is not None: # response
+            return f'{self.version} {self.status_code} {self.reason}'
+        else: # request
+            host = self.headers.get('host')
+            if host:
+                return f'{self.method} {self.target} {self.version} (host: {host})'
+            
+            return f'{self.method} {self.target} {self.version}'

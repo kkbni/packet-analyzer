@@ -10,6 +10,23 @@ class ICMPv6Message:
     extended_header: bytes # else
     payload: bytes
 
+    _TYPE_MAP = {
+        1: 'Destination Unreachable',
+        2: 'Packet Too Big',
+        3: 'Time Exceeded',
+        4: 'Parameter Problem',
+        128: 'Echo Request',
+        129: 'Echo Reply',
+        130: 'Multicast Listener Query',
+        131: 'Multicast Listener Report',
+        132: 'Multicast Listener Done',
+        133: 'Router Solicitation',
+        134: 'Router Advertisement',
+        135: 'Neighbor Solicitation',
+        136: 'Neighbor Advertisement',
+        137: 'Redirect'
+    }
+
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 8:
@@ -34,24 +51,7 @@ class ICMPv6Message:
         return cls(message_type, code, checksum, identifier, seq_num, extended_header, payload)
 
     def __str__(self):
-        type_map = {
-            1: 'Destination Unreachable',
-            2: 'Packet Too Big',
-            3: 'Time Exceeded',
-            4: 'Parameter Problem',
-            128: 'Echo Request',
-            129: 'Echo Reply',
-            130: 'Multicast Listener Query',
-            131: 'Multicast Listener Report',
-            132: 'Multicast Listener Done',
-            133: 'Router Solicitation',
-            134: 'Router Advertisement',
-            135: 'Neighbor Solicitation',
-            136: 'Neighbor Advertisement',
-            137: 'Redirect'
-        }
-
-        type_str = type_map.get(self.type, 'Unknown')
+        type_str = self._TYPE_MAP.get(self.type, 'Unknown')
 
         if self.type in (128, 129):
             info_str = (
@@ -66,6 +66,14 @@ class ICMPv6Message:
             f'type: ({self.type}) {type_str}\n'
             f'{info_str}'
         )
+
+    def info(self):
+        type_str = self._TYPE_MAP.get(self.type, 'Unknown')
+
+        if self.type in (128, 129):
+            return f'{type_str} ({self.type}): id={self.identifier}, seq={self.seq_num}'
+        else:
+            return f'{type_str} ({self.type}): code={self.code}'
 
     @property
     def application_ports(self):

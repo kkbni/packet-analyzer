@@ -21,6 +21,18 @@ class TCPSegment:
     options: bytes
     payload: bytes
 
+    def _get_flags_str(self):
+        flags = []
+        if self.flag_urg: flags.append('URG')
+        if self.flag_ack: flags.append('ACK')
+        if self.flag_psh: flags.append('PSH')
+        if self.flag_rst: flags.append('RST')
+        if self.flag_syn: flags.append('SYN')
+        if self.flag_fin: flags.append('FIN')
+
+        flags_str = ', '.join(flags) if flags else '-'
+        return flags_str
+
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 20:
@@ -56,22 +68,18 @@ class TCPSegment:
                    window_size, checksum, urgent_ptr, options, payload)
 
     def __str__(self):
-        flags = []
-        if self.flag_urg: flags.append('URG')
-        if self.flag_ack: flags.append('ACK')
-        if self.flag_psh: flags.append('PSH')
-        if self.flag_rst: flags.append('RST')
-        if self.flag_syn: flags.append('SYN')
-        if self.flag_fin: flags.append('FIN')
-
-        flags_str = ', '.join(flags) if flags else '-'
-
+        flags_str = self._get_flags_str()
         return (
             f'-- TCP segment:\n'
             f'src port: {self.src_port}\n'
             f'dest port: {self.dest_port}\n'
+            f'seq number: {self.seq_num}\n'
             f'flags: {flags_str}\n'
         )
+
+    def info(self):
+        flags_str = self._get_flags_str()
+        return f'ports: {self.src_port} -> {self.dest_port}, seq: {self.seq_num}, flags: {flags_str}'
 
     @property
     def application_ports(self):

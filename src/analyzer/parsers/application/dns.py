@@ -236,3 +236,9 @@ class DNSMessage:
                     output_str += f'{record}\n'
 
         return output_str
+
+    def info(self):
+        if self.flag_qr: # response
+            return f'Response (rcode: {self.rcode})'
+        else: # request
+            return f'Query (id: {self.identification})'

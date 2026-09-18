@@ -31,6 +31,9 @@ class UDPDatagram:
             f'dest port: {self.dest_port}\n'
         )
 
+    def info(self):
+        return f'ports: {self.src_port} -> {self.dest_port}'
+
     @property
     def application_ports(self):
         return (self.src_port, self.dest_port)

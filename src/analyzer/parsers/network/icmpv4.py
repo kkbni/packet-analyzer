@@ -10,6 +10,19 @@ class ICMPv4Message:
     extended_header: bytes # else
     payload: bytes
 
+    _TYPE_MAP = {
+        0:  'Echo Reply',
+        3: 'Destination Unreachable',
+        5: 'Redirect Message',
+        8: 'Echo Request',
+        9: 'Router Advertisement',
+        10: 'Router Solicitation',
+        11: 'Time Exceeded',
+        12: 'Parameter Problem',
+        13: 'Timestamp',
+        14: 'Timestamp Reply'
+    }
+
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 8:
@@ -34,20 +47,7 @@ class ICMPv4Message:
         return cls(message_type, code, checksum, identifier, seq_num, extended_header, payload)
 
     def __str__(self):
-        type_map = {
-            0:  'Echo Reply',
-            3: 'Destination Unreachable',
-            5: 'Redirect Message',
-            8: 'Echo Request',
-            9: 'Router Advertisement',
-            10: 'Router Solicitation',
-            11: 'Time Exceeded',
-            12: 'Parameter Problem',
-            13: 'Timestamp',
-            14: 'Timestamp Reply'
-        }
-
-        type_str = type_map.get(self.type, 'Unknown')
+        type_str = self._TYPE_MAP.get(self.type, 'Unknown')
 
         if self.type in (0, 8):
             info_str = (
@@ -62,6 +62,14 @@ class ICMPv4Message:
             f'type: ({self.type}) {type_str}\n'
             f'{info_str}'
         )
+
+    def info(self):
+        type_str = self._TYPE_MAP.get(self.type, 'Unknown')
+
+        if self.type in (0, 8):
+            return f'{type_str} ({self.type}): id={self.identifier}, seq={self.seq_num}'
+        else:
+            return f'{type_str} ({self.type}): code={self.code}'
 
     @property
     def application_ports(self):

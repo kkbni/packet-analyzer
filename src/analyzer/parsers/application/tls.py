@@ -12,6 +12,23 @@ class TLSMessage:
     # --------------------------
     sni: str | None = None # Server Name Identification
 
+    _HANDSHAKE_TYPE_MAP = {
+        1: 'Client Hello',
+        2: 'Server Hello',
+        11: 'Certificate',
+        12: 'Server Key Exchange',
+        14: 'Server Hello Done',
+        16: 'Client Key Exchange',
+        20: 'Finished'
+    }
+    _CONTENT_TYPE_MAP = {
+        20: 'Change Cipher Spec',
+        21: 'Alert',
+        22: 'Handshake',
+        23: 'Application Data',
+        24: 'Heartbeat'
+    }
+
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 5: 
@@ -88,32 +105,15 @@ class TLSMessage:
         return cls(content_type, version, payload_length, handshake_type, handshake_len, sni_str)
 
     def __str__(self):
-        content_type_map = {
-            20: 'Change Cipher Spec',
-            21: 'Alert',
-            22: 'Handshake',
-            23: 'Application Data',
-            24: 'Heartbeat'
-        }
-        content_type_str = content_type_map.get(self.content_type, f'Unknown ({self.content_type})')
+        content_type_str = self._CONTENT_TYPE_MAP.get(self.content_type, f'Unknown ({self.content_type})')
 
         output_str = (
             f'-- TLS message:\n'
             f'type: {content_type_str}\n'
             f'length: {self.payload_length} bytes\n'
         )
-
         if self.content_type == 22 and self.handshake_type:
-            handshake_type_map = {
-                1: 'Client Hello',
-                2: 'Server Hello',
-                11: 'Certificate',
-                12: 'Server Key Exchange',
-                14: 'Server Hello Done',
-                16: 'Client Key Exchange',
-                20: 'Finished'
-            }   
-            handshake_type_str = handshake_type_map.get(self.handshake_type, f'Unknown ({self.handshake_type})')
+            handshake_type_str = self._HANDSHAKE_TYPE_MAP.get(self.handshake_type, f'Unknown ({self.handshake_type})')
 
             output_str += (
                 f'handshake type: {handshake_type_str}\n'
@@ -127,3 +127,15 @@ class TLSMessage:
 
         return output_str
 
+    def info(self):
+        content_type_str = self._CONTENT_TYPE_MAP.get(self.content_type, f'Content type {self.content_type}')
+
+        if self.content_type == 22 and self.handshake_type is not None:
+            handshake_type_str = self._HANDSHAKE_TYPE_MAP.get(self.handshake_type, f'Unknown ({self.handshake_type})')
+            
+            if self.handshake_type == 1 and self.sni:
+                return f'Handshake ({handshake_type_str}) - SNI: {self.sni}'
+            
+            return f'Handshake ({handshake_type_str})'
+        
+        return f'{content_type_str}: (len={self.payload_length})'

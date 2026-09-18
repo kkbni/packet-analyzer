@@ -62,6 +62,13 @@ class ARPPacket:
             f'dest IP: {self.target_proto_addr}\n'
         )
 
+    def info(self):
+        if self.operation == 1:
+            return f'Who has {self.target_proto_addr}? Tell {self.sender_proto_addr}'
+        elif self.operation == 2:
+            return f'{self.sender_proto_addr} is at {self.sender_hw_addr}'
+        return f'Opcode: {self.operation}'
+
     @property
     def ip_proto(self):
         return None
