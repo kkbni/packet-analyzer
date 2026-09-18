@@ -40,7 +40,7 @@ class IPv4Packet:
         total_len = int.from_bytes(data[2:4], 'big')
         if total_len < header_len or total_len > len(data):
             raise ValueError(
-                'IPv4 packet: invalid total length'
+                'IPv4 packet: invalid total length\n'
                 f'(header={header_len}, total={total_len}, captured={len(data)})'
                 )
         

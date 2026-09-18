@@ -1,6 +1,7 @@
 import socket
 
 ETH_P_ALL = 0x0003 # proto for every packet
+MAX_IPV4_PACKET_SIZE = 65535
 
 class PacketCapturer:
     def __init__(self, interface: str):
@@ -16,5 +17,5 @@ class PacketCapturer:
 
     def capture(self):
         while True:
-            data, _ = self.socket.recvfrom(1024)
+            data, _ = self.socket.recvfrom(MAX_IPV4_PACKET_SIZE)
             yield data
