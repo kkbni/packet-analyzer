@@ -16,6 +16,8 @@ A custom network packet sniffer built in Python. This project captures raw netwo
   
   > for TLS: extracts SNI from the plaintext Client Hello
 
+* **Interactive Terminal UI:** Multithreaded architecture that separates background packet capture from a live-updating display.
+
 ## Architecture Overview
 The sniffer follows a layer-by-layer unwrapping approach:
 
@@ -23,7 +25,18 @@ The sniffer follows a layer-by-layer unwrapping approach:
 
 2. **Main Loop:** The `__main__.py` module runs the pipeline, passing the payload sequentially through the stack: Link -> Network -> IP Payload -> Application.
 
-3. **Dispatcher:** The `dispatch.py` acts as a traffic router. It uses dictionaries to match IDs (e.g., `ETHER_TYPE_IPV4 = 0x0800` or `APP_PORT_HTTPS = 443`) to their specific parser classes. It also acts as a shield, using centralized exception handling to drop malformed packets without crashing the sniffer .
+3. **Dispatcher:** The `dispatch.py` acts as a traffic router. It uses dictionaries to match IDs (e.g., `ETHER_TYPE_IPV4 = 0x0800` or `APP_PORT_HTTPS = 443`) to their specific parser classes. It also acts as a shield, using centralized exception handling to drop malformed packets without crashing the sniffer.
+
+## Interactive Interface
+The analyzer includes a custom interactive command-line interface (CLI) to inspect traffic without stopping the capture:
+
+* **Live Feed:** Displays real-time summaries of network traffic including protocol names, IP flows, and dynamic top-layer summaries.
+
+* **Command Mode:** Pressing `Ctrl+Z` pauses the live feed and opens an interactive shell while the packet capture continues in a background thread.
+
+* **Inspection:** Users can inspect the fully decoded, multi-layer hierarchy of a specific packet by typing its ID.
+
+* **Navigation:** `next` (`n`) and `prev` (`p`) commands allow users to step through the packet history chronologically.
 
 ## Project Structure
 The package is organized for scalability:
@@ -52,7 +65,7 @@ sudo python3 -m src.analyzer
 ## Future Work
 *(In development)*
 
-* **UX Improvements:** Refine terminal output and overall user interaction.
+* **Display Filters:** Implement interactive filtering within the CLI to isolate specific traffic without dropping packets.
 
 * **TCP Reassembly:** Implement connection tracking to stitch together fragmented HTTP responses.
 
