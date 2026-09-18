@@ -34,7 +34,7 @@ class HTTPMessage:
         
         headers_data, separator, body = data.partition(b'\r\n\r\n')
         if not separator:
-            raise ValueError('HTTP message: incomplete headers\n')
+            raise ValueError('HTTP message: incomplete headers')
 
         lines = headers_data.split(b'\r\n')
         try:
@@ -42,7 +42,7 @@ class HTTPMessage:
             header_lines = [ line.decode('iso-8859-1') for line in lines[1:] ]
 
         except UnicodeDecodeError as err:
-            raise ValueError('HTTP message: invalid encoding\n') from err
+            raise ValueError('HTTP message: invalid encoding') from err
 
         headers = {}
         for line in header_lines:
@@ -51,35 +51,35 @@ class HTTPMessage:
 
             name, separator, value = line.partition(':')
             if not separator or not name:
-                raise ValueError('HTTP message: invalid header\n')
+                raise ValueError('HTTP message: invalid header')
             
             headers[ name.strip().lower() ] = value.strip()
 
         parts = start_line.split(' ', 2)
         if start_line.startswith('HTTP/'):
             if len(parts) < 2:
-                raise ValueError('HTTP message: invalid response line\n')
+                raise ValueError('HTTP message: invalid response line')
             
             try:
                 status_code = int(parts[1])
             except ValueError as err:
-                raise ValueError('HTTP message: invalid status code\n') from err
+                raise ValueError('HTTP message: invalid status code') from err
 
             version = parts[0].strip()
             reason = parts[2].strip() if len(parts) == 3 else ''
 
             if version not in cls.SUPPORTED_VERSIONS:
-                raise ValueError(f'HTTP message: unsupported version -> {version}\n')
+                raise ValueError(f'HTTP message: unsupported version -> {version}')
 
             return cls(version, headers, body, status_code=status_code, reason=reason)
 
         if len(parts) != 3 or not parts[2].startswith('HTTP/'):
-            raise ValueError('HTTP message: invalid request line\n')
+            raise ValueError('HTTP message: invalid request line')
 
         version = parts[2].strip()
 
         if version not in cls.SUPPORTED_VERSIONS:
-            raise ValueError(f'HTTP message: unsupported version -> {version}\n')
+            raise ValueError(f'HTTP message: unsupported version -> {version}')
 
         method = parts[0].strip()
         target = parts[1].strip()

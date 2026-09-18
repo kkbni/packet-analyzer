@@ -16,24 +16,24 @@ class ARPPacket:
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 28:
-            raise ValueError('ARP packet: incomplete header\n')
+            raise ValueError('ARP packet: incomplete header')
 
         hw_type = int.from_bytes(data[0:2], 'big')
         protocol = int.from_bytes(data[2:4], 'big')
 
         # not standard ARP
         if hw_type != 1 or protocol != 0x0800:
-            raise ValueError('ARP packet: not Ethernet-IPv4\n')
+            raise ValueError('ARP packet: not Ethernet-IPv4')
 
         hw_addr_len = data[4]
 
         if hw_addr_len != 6:
-            raise ValueError('ARP packet: invalid MAC address length\n')
+            raise ValueError('ARP packet: invalid MAC address length')
 
         proto_addr_len = data[5]
 
         if proto_addr_len != 4:
-            raise ValueError('ARP packet: invalid IPv4 address length\n')
+            raise ValueError('ARP packet: invalid IPv4 address length')
 
         operation = int.from_bytes(data[6:8], 'big')
         sender_mac = data[8:14].hex(':')
@@ -69,3 +69,11 @@ class ARPPacket:
     @property
     def payload(self):
         return None
+
+    @property
+    def src_ip(self):
+        return self.sender_proto_addr
+
+    @property
+    def dest_ip(self):
+        return self.target_proto_addr

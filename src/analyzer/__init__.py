@@ -1,3 +1,3 @@
 # __init__.py
 
-print('----- Package initialized -----')
+print('----- Package initialized -----\n')

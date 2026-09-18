@@ -13,7 +13,7 @@ class ICMPv4Message:
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 8:
-            raise ValueError('ICMPv4 message: incomplete header\n')
+            raise ValueError('ICMPv4 message: incomplete header')
 
         message_type = data[0]
         code = data[1]

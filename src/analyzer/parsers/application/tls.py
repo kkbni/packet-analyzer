@@ -15,7 +15,7 @@ class TLSMessage:
     @classmethod
     def parse(cls, data: bytes):
         if len(data) < 5: 
-            raise ValueError('TLS message: incomplete record header\n')
+            raise ValueError('TLS message: incomplete record header')
 
         content_type = data[0]
         version = int.from_bytes(data[1:3], 'big')
@@ -26,7 +26,7 @@ class TLSMessage:
             return cls(content_type, version, payload_length)
 
         if len(data) < 9:
-            raise ValueError('TLS message: incomplete handshake header\n')
+            raise ValueError('TLS message: incomplete handshake header')
 
         handshake_type = data[5]
         handshake_len = int.from_bytes(data[6:9], 'big')
@@ -83,7 +83,7 @@ class TLSMessage:
                     offset += ext_len # go to next ext
                     
             except IndexError:
-                raise ValueError('TLS message: fragmented Client Hello message\n')
+                raise ValueError('TLS message: fragmented Client Hello message')
 
         return cls(content_type, version, payload_length, handshake_type, handshake_len, sni_str)
 
