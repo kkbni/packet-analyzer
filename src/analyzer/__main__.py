@@ -77,7 +77,7 @@ def main():
     worker = threading.Thread(target=capture_worker, args=[capturer], daemon=True)
     worker.start()
 
-    print('Press Ctrl+Z to enter COMMAND MODE')
+    print('Use Ctrl+Z to enter COMMAND MODE')
     print('----- Capture started -----\n')
 
     # the main UI loop
@@ -114,8 +114,16 @@ def main():
                         command_mode = False
 
                     elif cmd in ('h', 'help'):
-                        # TODO
-                        print('MANUAL\n')
+                        print(
+                            '* Use Ctrl+C to SHUT DOWN the application.\n'
+                            '* Use Ctrl+Z to enter COMMAND MODE.\n'
+                            '\n'
+                            '* In COMMAND MODE:\n'
+                            '[id]       - Inspect a specific packet by its ID (e.g. 42)\n'
+                            'r, resume  - Exit COMMAND MODE and resume the live feed\n'
+                            'h, help    - Show this MANUAL\n'
+                            'q, quit    - SHUT DOWN the application\n'
+                        )
 
                     elif not cmd:
                         pass
