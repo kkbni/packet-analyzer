@@ -14,7 +14,7 @@ A custom network packet sniffer built in Python. This project captures raw netwo
   * **Transport Layer:** TCP, UDP
   * **Application Layer:** DNS, HTTP, HTTPS/TLS
   
-  > for TLS: extracts SNI from the plaintext Client Hello
+  *for TLS: extracts SNI from the plaintext Client Hello*
 
 * **Interactive Terminal UI:** Multithreaded architecture that separates background packet capture from a live-updating display.
 
@@ -42,25 +42,51 @@ The analyzer includes a custom interactive command-line interface (CLI) to inspe
 The package is organized for scalability:
 
 ```text
-src/analyzer/
-├── __init__.py           # Package initialization
-├── __main__.py           # The main loop
-├── capture.py            # AF_PACKET raw socket capture
-├── dispatch.py           # Protocol routing maps and error handling
-└── parsers/              # Protocol-specific parser definitions
-    ├── application/      
-    ├── link/             
-    ├── network/          
-    └── transport/        
+packetTracer/
+├── src/
+│   └── analyzer/
+│       ├── __init__.py           # Package initialization
+│       ├── __main__.py           # The main loop
+│       ├── capture.py            # AF_PACKET raw socket capture
+│       ├── dispatch.py           # Protocol routing maps and error handling
+│       ├── ui.py                 # Interactive CLI state machine
+│       └── parsers/              # Protocol-specific parser definitions
+│           ├── application/      
+│           ├── link/             
+│           ├── network/          
+│           └── transport/        
+├── .dockerignore                 # Excludes local artifacts from container
+├── .gitignore                    # Excludes local artifacts from version control
+├── Dockerfile                    # Container build instructions
+└── README.md                     # Project documentation      
 ```
 
 ## Running the Sniffer
 Because this tool uses `SOCK_RAW` to bypass the OS network stack and access Layer 2 frames, it requires elevated system privileges to run. 
 
 ```bash
-# Execute the module with root privileges
+# Execute the module with root privileges (defaults to capturing on eth0)
 sudo python3 -m src.analyzer
+
+# Specify a custom network interface (e.g. wlan0)
+sudo python3 -m src.analyzer -i wlan0
+
+# View the help menu
+python3 -m src.analyzer -h
 ```
+
+## Docker Containerization
+The analyzer can be run in a lightweight Docker container. Because it requires raw network access and an interactive terminal, specific runtime flags are needed.
+
+```bash
+# 1. Build the image
+docker build -t packet-analyzer .
+
+# 2. Run interactively with host networking and raw socket capabilities
+docker run -it --network host --cap-add=NET_RAW packet-analyzer -i eth0
+```
+
+*Note: The `-it` flag ensures Command Mode works, `--network host` allows the container to see the host's actual interfaces, and `--cap-add=NET_RAW` provides necessary socket permissions.*
 
 ## Future Work
 *(In development)*
